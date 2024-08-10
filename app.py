@@ -16,7 +16,21 @@ tfidf = pickle.load(open('tfidf_vectorizer.sav', 'rb'))
 # Initialize the PorterStemmer
 ps = PorterStemmer()
 
+# Initialize NLTK data
+nltk.download('punkt')
+nltk.download('stopwords')
+
 def transform_sms(message):
+    """
+    Transform the input SMS by converting to lowercase, removing special symbols, 
+    removing stopwords and punctuations, and stemming.
+    
+    Args:
+        message (str): The input SMS message.
+    
+    Returns:
+        str: The transformed SMS message.
+    """
     # Convert all characters to lowercase
     message = message.lower()
 
@@ -37,6 +51,15 @@ def transform_sms(message):
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    """
+    Predict whether the input SMS is spam or not.
+    
+    Args:
+        message (str): The input SMS message.
+    
+    Returns:
+        JSON: The prediction result.
+    """
     data = request.get_json()
     input_sms = data.get('message')
     
@@ -53,7 +76,7 @@ def predict():
     pred = model_mnb.predict(input_sms_vectorized)[0]
     
     # Return the prediction as JSON
-    return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})
+    return jsonify({'prediction': 'Spam' if pred == 0 else 'Not Spam'})
 
 if __name__ == '__main__':
     app.run(debug=True)
