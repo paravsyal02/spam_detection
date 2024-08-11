@@ -4,7 +4,7 @@
 
 The Spam Detection API is a RESTful service that classifies SMS messages as either "Spam" or "Not Spam" using a pre-trained machine learning model. The API is built using Flask and is deployed on Render.
 
-**Base URL:** `https://spam-detection-wdd4.onrender.com`
+**Base URL:** 'https://spam-detection-eqpy.onrender.com'
 
 ## Features
 
@@ -111,7 +111,7 @@ To use this API, follow these steps to clone and set up the project locally:
 ## Testing with Postman
 
 1. **Open Postman and create a new POST request.**
-2. **Enter the URL:** `https://spam-detection-wdd4.onrender.com/predict`
+2. **Enter the URL:** `https://spam-detection-eqpy.onrender.com/predict`
 3. **Set the header `Content-Type` to `application/json`.**
 4. **In the body tab, select `raw` and `JSON` format, then enter:**
 
