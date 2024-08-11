@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import numpy as np
 import pickle
 import nltk
+nltk.download('punkt')
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import string
