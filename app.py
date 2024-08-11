@@ -13,12 +13,20 @@ import urllib.request
 app = Flask(__name__)
 
 # URLs to your files
-MODEL_URL = 'https://github.com/paravsyal02/spam_detection/releases/download/v1.0.0/model.sav'
-TFIDF_URL = 'https://github.com/paravsyal02/spam_detection/releases/download/v1.0.0/tfidf_vectorizer.sav'
+MODEL_URL = os.getenv('MODEL_URL', 'https://github.com/paravsyal02/spam_detection/releases/download/v1.0.0/model.sav')
+TFIDF_URL = os.getenv('TFIDF_URL', 'https://github.com/paravsyal02/spam_detection/releases/download/v1.0.0/tfidf_vectorizer.sav')
 
-# Download the model and vectorizer from the URLs
-urllib.request.urlretrieve(MODEL_URL, 'model.sav')
-urllib.request.urlretrieve(TFIDF_URL, 'tfidf_vectorizer.sav')
+# Download the model and vectorizer from the URLs if not already downloaded
+def download_file(url, file_name):
+    if not os.path.exists(file_name):
+        try:
+            urllib.request.urlretrieve(url, file_name)
+            print(f'{file_name} downloaded successfully.')
+        except Exception as e:
+            print(f'Failed to download {file_name}: {e}')
+
+download_file(MODEL_URL, 'model.sav')
+download_file(TFIDF_URL, 'tfidf_vectorizer.sav')
 
 # Load the model and vectorizer
 model_mnb = joblib.load('model.sav')
@@ -87,7 +95,7 @@ def predict():
     pred = model_mnb.predict(input_sms_vectorized)[0]
     
     # Return the prediction as JSON
-    return jsonify({'prediction': 'Spam' if pred == 0 else 'Not Spam'})
+    return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})  # Assuming '1' is Spam, '0' is Not Spam
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
