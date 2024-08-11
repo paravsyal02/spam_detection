@@ -7,5 +7,4 @@ nltk
 flask
 joblib
 wordcloud
-urllib.request
 os
