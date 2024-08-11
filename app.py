@@ -31,7 +31,6 @@ try:
     download_file(TFIDF_URL, 'tfidf_vectorizer.sav')
 except Exception as e:
     print(f"Error during file download: {e}")
-    # Exit or raise an error to prevent the app from running without necessary files
     raise SystemExit(e)
 
 # Load the model and vectorizer
@@ -49,17 +48,10 @@ ps = PorterStemmer()
 nltk.download('punkt')
 nltk.download('stopwords')
 
+# Ensure the 'punkt' resource is available
+nltk.download('punkt_tab')
+
 def transform_sms(message):
-    """
-    Transform the input SMS by converting to lowercase, removing special symbols, 
-    removing stopwords and punctuations, and stemming.
-    
-    Args:
-        message (str): The input SMS message.
-    
-    Returns:
-        str: The transformed SMS message.
-    """
     try:
         # Convert all characters to lowercase
         message = message.lower()
@@ -85,15 +77,6 @@ def transform_sms(message):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    """
-    Predict whether the input SMS is spam or not.
-    
-    Args:
-        message (str): The input SMS message.
-    
-    Returns:
-        JSON: The prediction result.
-    """
     try:
         data = request.get_json()
         input_sms = data.get('message')
@@ -113,7 +96,7 @@ def predict():
         pred = model_mnb.predict(input_sms_vectorized)[0]
         
         # Return the prediction as JSON
-        return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})  # Assuming '1' is Spam, '0' is Not Spam
+        return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})
 
     except Exception as e:
         print(f"Error in prediction: {e}")
