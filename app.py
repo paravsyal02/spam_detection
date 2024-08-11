@@ -7,6 +7,7 @@ from nltk.stem import PorterStemmer
 import string
 import joblib
 import os
+import urllib.request
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -86,7 +87,7 @@ def predict():
     pred = model_mnb.predict(input_sms_vectorized)[0]
     
     # Return the prediction as JSON
-    return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})
+    return jsonify({'prediction': 'Spam' if pred == 0 else 'Not Spam'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
