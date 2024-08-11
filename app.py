@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 import numpy as np
 import pickle
 import nltk
-nltk.download('punkt')
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import string
@@ -25,13 +24,23 @@ def download_file(url, file_name):
             print(f'{file_name} downloaded successfully.')
         except Exception as e:
             print(f'Failed to download {file_name}: {e}')
+            raise
 
-download_file(MODEL_URL, 'model.sav')
-download_file(TFIDF_URL, 'tfidf_vectorizer.sav')
+try:
+    download_file(MODEL_URL, 'model.sav')
+    download_file(TFIDF_URL, 'tfidf_vectorizer.sav')
+except Exception as e:
+    print(f"Error during file download: {e}")
+    # Exit or raise an error to prevent the app from running without necessary files
+    raise SystemExit(e)
 
 # Load the model and vectorizer
-model_mnb = joblib.load('model.sav')
-tfidf = joblib.load('tfidf_vectorizer.sav')
+try:
+    model_mnb = joblib.load('model.sav')
+    tfidf = joblib.load('tfidf_vectorizer.sav')
+except Exception as e:
+    print(f"Error loading model or vectorizer: {e}")
+    raise SystemExit(e)
 
 # Initialize the PorterStemmer
 ps = PorterStemmer()
@@ -51,23 +60,28 @@ def transform_sms(message):
     Returns:
         str: The transformed SMS message.
     """
-    # Convert all characters to lowercase
-    message = message.lower()
+    try:
+        # Convert all characters to lowercase
+        message = message.lower()
 
-    # Break SMS record into words
-    message = nltk.word_tokenize(message)
+        # Break SMS record into words
+        message = nltk.word_tokenize(message)
 
-    # Remove special symbols (keeping only alphanumeric characters)
-    temp = [i for i in message if i.isalnum()]
+        # Remove special symbols (keeping only alphanumeric characters)
+        temp = [i for i in message if i.isalnum()]
 
-    # Removing stopwords and punctuations
-    temp = [i for i in temp if i not in stopwords.words('english') and i not in string.punctuation]
+        # Removing stopwords and punctuations
+        temp = [i for i in temp if i not in stopwords.words('english') and i not in string.punctuation]
 
-    # Stemming
-    temp = [ps.stem(i) for i in temp]
+        # Stemming
+        temp = [ps.stem(i) for i in temp]
 
-    # Return the transformed message as a single string
-    return " ".join(temp)
+        # Return the transformed message as a single string
+        return " ".join(temp)
+    
+    except Exception as e:
+        print(f"Error in SMS transformation: {e}")
+        return None
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -80,23 +94,30 @@ def predict():
     Returns:
         JSON: The prediction result.
     """
-    data = request.get_json()
-    input_sms = data.get('message')
-    
-    if not input_sms:
-        return jsonify({'error': 'No message provided'}), 400
-    
-    # Transform the input SMS
-    input_sms = transform_sms(input_sms)
+    try:
+        data = request.get_json()
+        input_sms = data.get('message')
+        
+        if not input_sms:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        # Transform the input SMS
+        input_sms = transform_sms(input_sms)
+        if input_sms is None:
+            return jsonify({'error': 'Failed to process the message'}), 500
 
-    # Convert the transformed SMS into TF-IDF vector
-    input_sms_vectorized = tfidf.transform([input_sms])
+        # Convert the transformed SMS into TF-IDF vector
+        input_sms_vectorized = tfidf.transform([input_sms])
 
-    # Predict using the loaded model
-    pred = model_mnb.predict(input_sms_vectorized)[0]
-    
-    # Return the prediction as JSON
-    return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})  # Assuming '1' is Spam, '0' is Not Spam
+        # Predict using the loaded model
+        pred = model_mnb.predict(input_sms_vectorized)[0]
+        
+        # Return the prediction as JSON
+        return jsonify({'prediction': 'Spam' if pred == 1 else 'Not Spam'})  # Assuming '1' is Spam, '0' is Not Spam
+
+    except Exception as e:
+        print(f"Error in prediction: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
