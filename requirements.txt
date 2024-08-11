@@ -7,3 +7,4 @@ nltk
 flask
 joblib
 wordcloud
+guincorn
