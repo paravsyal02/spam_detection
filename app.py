@@ -5,13 +5,23 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import string
+import joblib
+import urllib.request
 
 # Initialize Flask app
 app = Flask(__name__)
 
+# URLs to your files
+MODEL_URL = 'https://github.com/paravsyal02/spam_detection/releases/download/v1.0.0/model.sav'
+TFIDF_URL = 'https://github.com/paravsyal02/spam_detection/releases/download/v1.0.0/tfidf_vectorizer.sav'
+
+# Download the model and vectorizer from the URLs
+urllib.request.urlretrieve(MODEL_URL, 'model.sav')
+urllib.request.urlretrieve(TFIDF_URL, 'tfidf_vectorizer.sav')
+
 # Load the model and vectorizer
-model_mnb = pickle.load(open('model.sav', 'rb'))
-tfidf = pickle.load(open('tfidf_vectorizer.sav', 'rb'))
+model_mnb = joblib.load('model.sav')
+tfidf = joblib.load('tfidf_vectorizer.sav')
 
 # Initialize the PorterStemmer
 ps = PorterStemmer()
@@ -79,4 +89,4 @@ def predict():
     return jsonify({'prediction': 'Spam' if pred == 0 else 'Not Spam'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=3000)
