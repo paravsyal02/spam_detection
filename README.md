@@ -25,3 +25,9 @@ The Spam Detection API provides a POST endpoint where you can submit SMS message
   {
     "message": "Your SMS message here"
   }
+
+
+Response:
+{
+  "prediction": "Spam"  // or "Not Spam"
+}
